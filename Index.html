@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Shopping - Sistema de Comidas</title>
+
+<!-- ============ PWA ============ -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff6b35">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Food Shopping">
+
+<!-- ============ ESTILOS ============ -->
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<div class="animated-bg"></div>
+<div class="bubbles" id="bubbles"></div>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="viewLogin" class="auth-body">
+  <div class="auth-wrapper">
+    <div class="info-panel fade-in">
+      <div class="brand float">🍽️ Food Shopping</div>
+      <p class="tagline">Tu sistema inteligente para reservar desayunos y almuerzos escolares de forma rápida y organizada.</p>
+      <div class="info-card">
+        <h4>🎓 Registro con NIE</h4>
+        <p>Regístrate con tu NIE del colegio o con tu correo electrónico.</p>
+      </div>
+      <div class="info-card">
+        <h4>⏰ Reserva anticipada</h4>
+        <p>Olvídate de las filas. Reserva desde cualquier dispositivo.</p>
+      </div>
+      <div class="info-card">
+        <h4>👩‍🍳 Cocina en tiempo real</h4>
+        <p>Las cocineras reciben tu pedido al instante.</p>
+      </div>
+      <div class="info-card">
+        <h4>☁️ Datos seguros</h4>
+        <p>Guardado en una base de datos PostgreSQL segura.</p>
+      </div>
+    </div>
+
+    <div class="auth-container">
+      <div class="auth-card fade-in">
+        <h1 class="logo">🍽️ Food Shopping</h1>
+        <p class="subtitle">Reserva tu desayuno y almuerzo</p>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="login">Iniciar Sesión</button>
+          <button class="tab" data-tab="register">Registrarse</button>
+        </div>
+
+        <form id="loginForm" class="form active">
+          <div class="toggle-login">
+            <button type="button" class="active" data-login-mode="email">✉️ Con Correo</button>
+            <button type="button" data-login-mode="nie">🎓 Con NIE</button>
+          </div>
+          <div class="input-group" id="loginEmailGroup">
+            <span class="icon">✉️</span>
+            <input type="email" id="loginEmail" placeholder="Correo electrónico">
+          </div>
+          <div class="input-group hidden" id="loginNieGroup">
+            <span class="icon">🎓</span>
+            <input type="text" id="loginNie" placeholder="NIE (ej: 20240001)" maxlength="10">
+          </div>
+          <div class="input-group">
+            <span class="icon">🔒</span>
+            <input type="password" id="loginPassword" placeholder="Contraseña" required>
+          </div>
+          <button type="submit" class="btn-primary" id="loginBtn">Ingresar</button>
+        </form>
+
+        <form id="registerForm" class="form">
+          <div class="input-group">
+            <span class="icon">👤</span>
+            <input type="text" id="regName" placeholder="Nombre completo" required>
+          </div>
+          <div class="toggle-login">
+            <button type="button" class="active" data-reg-mode="email">✉️ Con Correo</button>
+            <button type="button" data-reg-mode="nie">🎓 Con NIE</button>
+          </div>
+          <div class="input-group" id="regEmailGroup">
+            <span class="icon">✉️</span>
+            <input type="email" id="regEmail" placeholder="Correo electrónico">
+          </div>
+          <div class="input-group hidden" id="regNieGroup">
+            <span class="icon">🎓</span>
+            <input type="text" id="regNie" placeholder="NIE del colegio (ej: 20240001)" maxlength="10">
+          </div>
+          <div class="input-group">
+            <span class="icon">🔒</span>
+            <input type="password" id="regPassword" placeholder="Contraseña" required>
+          </div>
+          <div class="input-group">
+            <span class="icon">🎭</span>
+            <select id="regRole" required>
+              <option value="">Selecciona tu rol</option>
+              <option value="usuario">👨‍🎓 Usuario (Pedir comida)</option>
+              <option value="cocinera">👩‍🍳 Cocinera (Gestionar pedidos)</option>
+            </select>
+          </div>
+          <p class="role-hint">Los estudiantes deben registrarse como Usuario</p>
+          <button type="submit" class="btn-primary" id="registerBtn">Crear cuenta</button>
+        </form>
+
+        <p id="authMessage" class="message"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== USUARIO ==================== -->
+<div id="viewUsuario" class="app-body hidden">
+  <header class="app-header slide-down">
+    <div class="header-content">
+      <h2>🍽️ Hola, <span id="userName">Usuario</span></h2>
+      <button id="logoutUserBtn" class="btn-logout">Salir</button>
+    </div>
+  </header>
+  <main class="container">
+    <div class="welcome-banner fade-in">
+      <h3>¿Qué quieres comer hoy?</h3>
+      <p id="deviceInfo" class="device-info"></p>
+    </div>
+    <section class="menu-section">
+      <h3 class="section-title">📋 Menú Disponible</h3>
+      <div id="menuListUser" class="menu-grid"></div>
+    </section>
+    <section class="order-section">
+      <h3 class="section-title">🛒 Tu Pedido</h3>
+      <div id="orderList" class="order-list"><p class="empty-msg">Aún no has agregado nada</p></div>
+      <div class="order-total">
+        <span>Total: $<span id="totalPrice">0.00</span></span>
+        <button id="sendOrderBtn" class="btn-primary">Enviar Pedido</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== COCINERA ==================== -->
+<div id="viewCocinera" class="app-body hidden">
+  <header class="app-header chef-header slide-down">
+    <div class="header-content">
+      <h2>👩‍🍳 Panel de <span id="chefName">Cocinera</span></h2>
+      <button id="logoutChefBtn" class="btn-logout">Salir</button>
+    </div>
+  </header>
+  <main class="container">
+    <div class="welcome-banner fade-in chef-banner">
+      <h3>Pedidos Pendientes</h3>
+      <p id="stats">0 pedidos pendientes</p>
+    </div>
+    <section class="menu-section">
+      <h3 class="section-title">➕ Agregar Platillo al Menú</h3>
+      <form id="addMenuForm" class="add-menu-form">
+        <input type="text" id="dishName" placeholder="Nombre del platillo" required>
+        <select id="dishType" required>
+          <option value="">Tipo</option>
+          <option value="Desayuno">Desayuno</option>
+          <option value="Almuerzo">Almuerzo</option>
+        </select>
+        <input type="number" id="dishPrice" placeholder="Precio" step="0.01" required>
+        <input type="text" id="dishEmoji" placeholder="Emoji (ej: 🥞)" maxlength="2">
+        <button type="submit" class="btn-primary">Agregar</button>
+      </form>
+      <div id="menuListChef" class="menu-grid"></div>
+    </section>
+    <section class="orders-section">
+      <h3 class="section-title">🔔 Pedidos Recibidos</h3>
+      <div id="ordersList" class="orders-list"></div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/app.js"></script>
+
+<!-- ============ PWA: SERVICE WORKER ============ -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✅ Service Worker registrado'))
+        .catch(err => console.error('❌ Error SW:', err));
+    });
+  }
+</script>
+
+</body>
+</html>
